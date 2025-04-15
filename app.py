@@ -51,7 +51,23 @@ def generate_code_with_codellama(description):
 
 # Streamlit app layout
 st.title("Python Code Generator with CodeLlama")
-st.write("Enter a description of the Python application or code you need
+st.write("Enter a description of the Python application or code you need. CodeLlama will generate the corresponding Python code.")
 
+# Input box for the user to enter a description
+description = st.text_area("Application or Code Description", placeholder="Describe the application or code you want")
+
+# Button to trigger code generation
+if st.button("Generate Code"):
+    if description.strip():
+        # Validate description length
+        if len(description.strip()) > 1000:
+            st.error("Description is too long. Please keep it under 1000 characters.")
+        else:
+            st.write("### Generated Python Code")
+            # Generate code
+            generated_code = generate_code_with_codellama(description)
+            st.code(generated_code, language="python")
+    else:
+        st.error("Please provide a valid description.")
 
 
