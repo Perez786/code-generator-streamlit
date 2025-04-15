@@ -3,19 +3,25 @@ import streamlit as st
 import os
 from together import Together
 
-# Debug secrets loading
-st.write("Secrets Loaded:", st.secrets)
-st.write("Keys Available:", list(st.secrets.keys()))
+# Debug secrets structure
+st.write("Secrets Loaded:", st.secrets)  # Display raw secrets
+st.write("Keys Available:", list(st.secrets.keys()))  # Display available keys
 
-# Handle TOGETHER_API_KEY
+# Handle TOGETHER_API_KEY access
 try:
-    api_key = st.secrets["TOGETHER_API_KEY"]  # Retrieve API key from secrets
-    client = Together(api_key=api_key)       # Pass the API key directly to Together client
+    # Adjust for the nested structure of secrets
+    api_key = st.secrets["secrets"]["TOGETHER_API_KEY"]  # Access nested key
+    client = Together(api_key=api_key)  # Pass API key directly to Together client
     st.write("TOGETHER_API_KEY Loaded Successfully")
 except KeyError:
-    st.error("TOGETHER_API_KEY is missing in the secrets configuration.")
+    # Handle missing key error
+    st.error("TOGETHER_API_KEY is missing in the secrets configuration. Ensure it's set correctly.")
 except Exception as e:
+    # Handle any other errors during client initialization
     st.error(f"Error initializing Together client: {e}")
+
+# Debugging: Check API key
+st.write("TOGETHER_API_KEY from Secrets:", st.secrets["secrets"].get("TOGETHER_API_KEY", "Not Found"))
 
 # Function to generate Python code using CodeLlama
 def generate_code_with_codellama(description):
@@ -78,5 +84,6 @@ if st.button("Generate Code"):
             st.code(generated_code, language="python")
     else:
         st.error("Please provide a valid description.")
+
 
 
