@@ -3,10 +3,20 @@ import streamlit as st
 import os
 from together import Together
 
-os.environ['TOGETHER_API_KEY'] = st.secrets["TOGETHER_API_KEY"]
+# Handle TOGETHER_API_KEY
+try:
+    os.environ['TOGETHER_API_KEY'] = st.secrets["TOGETHER_API_KEY"]
+except KeyError:
+    st.error("TOGETHER_API_KEY is missing in the secrets configuration.")
+
+# Debug: Print the API key to check if it's set correctly
+st.write("TOGETHER_API_KEY:", os.environ.get('TOGETHER_API_KEY', 'Not Set'))
 
 # Initialize Together client
-client = Together()
+try:
+    client = Together()
+except Exception as e:
+    st.error(f"Error initializing Together client: {e}")
 
 # Function to generate Python code using CodeLlama
 def generate_code_with_codellama(description):
@@ -20,6 +30,7 @@ def generate_code_with_codellama(description):
     str: Generated Python code or an error message.
     """
     try:
+        # Construct the prompt
         prompt = (
             f"You are a Python programming assistant. Based on the following description, "
             f"generate the Python code. Ensure the code is clear, well-commented, and includes necessary imports.\n\n"
@@ -33,13 +44,17 @@ def generate_code_with_codellama(description):
             messages=[{"role": "user", "content": prompt}]
         )
 
+        # Check if the response structure is valid
+        if not hasattr(response, "choices") or not response.choices:
+            raise ValueError("Invalid response from Together API.")
+
         # Extract the generated code
         generated_code = response.choices[0].message.content.strip()
         return generated_code
 
     except Exception as e:
+        # Handle any errors during the API call
         return f"Error with CodeLlama: {e}"
-
 
 # Streamlit app layout
 st.title("Python Code Generator with CodeLlama")
@@ -51,9 +66,14 @@ description = st.text_area("Application or Code Description", placeholder="Descr
 # Button to trigger code generation
 if st.button("Generate Code"):
     if description.strip():
-        st.write("### Generated Python Code")
-        # Generate code
-        generated_code = generate_code_with_codellama(description)
-        st.code(generated_code, language="python")
+        # Validate description length
+        if len(description.strip()) > 1000:
+            st.error("Description is too long. Please keep it under 1000 characters.")
+        else:
+            st.write("### Generated Python Code")
+            # Generate code
+            generated_code = generate_code_with_codellama(description)
+            st.code(generated_code, language="python")
     else:
         st.error("Please provide a valid description.")
+
