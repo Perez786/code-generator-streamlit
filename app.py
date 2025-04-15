@@ -1,10 +1,10 @@
-st.write("Secrets Loaded:", st.secrets)
-st.write("TOGETHER_API_KEY Value:", st.secrets.get("TOGETHER_API_KEY", "Not Found"))
-
 # Import necessary libraries
 import streamlit as st
 import os
 from together import Together
+
+st.write("Secrets Loaded:", st.secrets)
+st.write("TOGETHER_API_KEY Value:", st.secrets.get("TOGETHER_API_KEY", "Not Found"))
 
 # Handle TOGETHER_API_KEY
 try:
