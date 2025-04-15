@@ -1,27 +1,15 @@
 # Import necessary libraries
 import streamlit as st
-import os
 from together import Together
 
-# Debug secrets structure
-st.write("Secrets Loaded:", st.secrets)  # Display raw secrets
-st.write("Keys Available:", list(st.secrets.keys()))  # Display available keys
-
-# Handle TOGETHER_API_KEY access
+# Handle TOGETHER_API_KEY access and initialize Together client
 try:
-    # Adjust for the nested structure of secrets
     api_key = st.secrets["secrets"]["TOGETHER_API_KEY"]  # Access nested key
     client = Together(api_key=api_key)  # Pass API key directly to Together client
-    st.write("TOGETHER_API_KEY Loaded Successfully")
 except KeyError:
-    # Handle missing key error
     st.error("TOGETHER_API_KEY is missing in the secrets configuration. Ensure it's set correctly.")
 except Exception as e:
-    # Handle any other errors during client initialization
     st.error(f"Error initializing Together client: {e}")
-
-# Debugging: Check API key
-st.write("TOGETHER_API_KEY from Secrets:", st.secrets["secrets"].get("TOGETHER_API_KEY", "Not Found"))
 
 # Function to generate Python code using CodeLlama
 def generate_code_with_codellama(description):
@@ -49,9 +37,6 @@ def generate_code_with_codellama(description):
             messages=[{"role": "user", "content": prompt}]
         )
 
-        # Debug response
-        st.write("Raw Response:", response)
-
         # Check if the response structure is valid
         if not hasattr(response, "choices") or not response.choices:
             raise ValueError("Invalid response from Together API.")
@@ -66,24 +51,7 @@ def generate_code_with_codellama(description):
 
 # Streamlit app layout
 st.title("Python Code Generator with CodeLlama")
-st.write("Enter a description of the Python application or code you need. CodeLlama will generate the corresponding Python code.")
-
-# Input box for the user to enter a description
-description = st.text_area("Application or Code Description", placeholder="Describe the application or code you want")
-
-# Button to trigger code generation
-if st.button("Generate Code"):
-    if description.strip():
-        # Validate description length
-        if len(description.strip()) > 1000:
-            st.error("Description is too long. Please keep it under 1000 characters.")
-        else:
-            st.write("### Generated Python Code")
-            # Generate code
-            generated_code = generate_code_with_codellama(description)
-            st.code(generated_code, language="python")
-    else:
-        st.error("Please provide a valid description.")
+st.write("Enter a description of the Python application or code you need
 
 
 
