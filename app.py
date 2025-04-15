@@ -3,22 +3,17 @@ import streamlit as st
 import os
 from together import Together
 
+# Debug secrets loading
 st.write("Secrets Loaded:", st.secrets)
-st.write("TOGETHER_API_KEY Value:", st.secrets.get("TOGETHER_API_KEY", "Not Found"))
+st.write("Keys Available:", list(st.secrets.keys()))
 
 # Handle TOGETHER_API_KEY
 try:
-    os.environ['TOGETHER_API_KEY'] = st.secrets["TOGETHER_API_KEY"]
+    api_key = st.secrets["TOGETHER_API_KEY"]  # Retrieve API key from secrets
+    client = Together(api_key=api_key)       # Pass the API key directly to Together client
+    st.write("TOGETHER_API_KEY Loaded Successfully")
 except KeyError:
     st.error("TOGETHER_API_KEY is missing in the secrets configuration.")
-
-# Debug: Print the API key to check if it's set correctly
-st.write("TOGETHER_API_KEY:", os.environ.get('TOGETHER_API_KEY', 'Not Set'))
-
-# Initialize Together client
-try:
-    client = Together(api_key=st.secrets["TOGETHER_API_KEY"])
-    
 except Exception as e:
     st.error(f"Error initializing Together client: {e}")
 
@@ -47,6 +42,9 @@ def generate_code_with_codellama(description):
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo",  # CodeLlama model
             messages=[{"role": "user", "content": prompt}]
         )
+
+        # Debug response
+        st.write("Raw Response:", response)
 
         # Check if the response structure is valid
         if not hasattr(response, "choices") or not response.choices:
@@ -80,4 +78,5 @@ if st.button("Generate Code"):
             st.code(generated_code, language="python")
     else:
         st.error("Please provide a valid description.")
+
 
