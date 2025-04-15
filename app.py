@@ -17,7 +17,8 @@ st.write("TOGETHER_API_KEY:", os.environ.get('TOGETHER_API_KEY', 'Not Set'))
 
 # Initialize Together client
 try:
-    client = Together()
+    client = Together(api_key=st.secrets["TOGETHER_API_KEY"])
+    
 except Exception as e:
     st.error(f"Error initializing Together client: {e}")
 
